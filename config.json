@@ -18,7 +18,7 @@
         "network": "ws",
         "security": "none",
         "wsSettings": {
-          "path": "/"
+          "path": "/laowang"
         }
       }
     }
