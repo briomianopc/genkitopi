@@ -1,54 +1,68 @@
 const fs = require('fs');
 const path = require('path');
-const { spawn } = require('child_process');
-const axios = require('axios');
-const AdmZip = require('adm-zip');
+const { spawn, execSync } = require('child_process');
 
 const UUID = process.env.UUID || '86c50e3a-5b87-49dd-bd20-03c7f2735e40';
-const PORT = process.env.PORT || 8080; // Koyeb 会自动注入这个变量
+const PORT = process.env.PORT || 8080;
 const XRAY_VERSION = 'v1.8.4'; 
 
-async function downloadXray() {
+function downloadAndInstall() {
   const downloadUrl = `https://github.com/XTLS/Xray-core/releases/download/${XRAY_VERSION}/Xray-linux-64.zip`;
-  console.log(`[Node] Downloading Xray: ${downloadUrl}`);
-  const writer = fs.createWriteStream('xray.zip');
-  const response = await axios({ url: downloadUrl, method: 'GET', responseType: 'stream' });
-  response.data.pipe(writer);
-  return new Promise((resolve, reject) => {
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-  });
-}
-
-function installXray() {
-  const zip = new AdmZip('xray.zip');
-  zip.extractAllTo(__dirname, true);
-  fs.chmodSync(path.join(__dirname, 'xray'), '755');
+  
+  if (!fs.existsSync('xray')) {
+    console.log(`[Node] Downloading Xray via curl: ${downloadUrl}`);
+    try {
+      // 使用 curl 下载 (-L 跟随重定向, -o 输出文件)
+      execSync(`curl -L -o xray.zip "${downloadUrl}"`);
+      
+      console.log('[Node] Unzipping...');
+      // 使用系统 unzip 命令
+      execSync('unzip -o xray.zip');
+      
+      // 赋予执行权限
+      execSync('chmod +x xray');
+      
+      console.log('[Node] Xray installed successfully.');
+    } catch (error) {
+      console.error('[Node] Download/Install failed:', error.message);
+      process.exit(1);
+    }
+  }
 }
 
 function generateConfig() {
-  const template = fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8');
-  const configContent = template
-    .replace(/PORT_PLACEHOLDER/g, parseInt(PORT))
-    .replace(/UUID_PLACEHOLDER/g, UUID);
+  // 读取模板
+  let configContent = fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8');
+  
+  // 替换变量
+  configContent = configContent.replace(/PORT_PLACEHOLDER/g, parseInt(PORT));
+  configContent = configContent.replace(/UUID_PLACEHOLDER/g, UUID);
+  
+  // 写入运行配置
   fs.writeFileSync('config_run.json', configContent);
 }
 
 function startXray() {
   console.log(`[Node] Starting Xray on port ${PORT}...`);
-  // 注意：这里让 Xray 直接监听 PORT，处理 HTTP/WS 流量
-  const child = spawn('./xray', ['-c', 'config_run.json'], { stdio: 'inherit', cwd: __dirname });
-  child.on('exit', (code) => process.exit(code));
+  // 启动 Xray
+  const child = spawn('./xray', ['-c', 'config_run.json'], { stdio: 'inherit' });
+  
+  child.on('error', (err) => {
+    console.error('[Node] Failed to start process:', err);
+  });
+
+  child.on('exit', (code) => {
+    console.log(`[Node] Xray exited with code ${code}`);
+    process.exit(code);
+  });
 }
 
-async function main() {
-  try {
-    if (!fs.existsSync(path.join(__dirname, 'xray'))) {
-      await downloadXray();
-      installXray();
-    }
-    generateConfig();
-    startXray();
-  } catch (error) { console.error(error); process.exit(1); }
+// 主流程
+try {
+  downloadAndInstall();
+  generateConfig();
+  startXray();
+} catch (e) {
+  console.error(e);
+  process.exit(1);
 }
-main();
