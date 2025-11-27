@@ -1,7 +1,7 @@
 {
-  "name": "koyeb-xray-reality",
+  "name": "koyeb-xray-ws",
   "version": "1.0.0",
-  "description": "Xray Core Wrapper",
+  "description": "Xray VLESS WebSocket",
   "main": "index.js",
   "scripts": { "start": "node index.js" },
   "dependencies": { "adm-zip": "^0.5.10", "axios": "^1.6.0" },
