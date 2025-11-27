@@ -1,16 +1,27 @@
 {
-  "name": "koyeb-xray-ws",
-  "version": "1.0.0",
-  "description": "Xray VLESS WebSocket",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "adm-zip": "^0.5.10",
-    "axios": "^1.6.0"
-  },
-  "engines": {
-    "node": "18.x"
-  }
+  "log": { "loglevel": "warning" },
+  "inbounds": [
+    {
+      "port": PORT_PLACEHOLDER,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "UUID_PLACEHOLDER",
+            "level": 0,
+            "email": "koyeb@user"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "path": "/"
+        }
+      }
+    }
+  ],
+  "outbounds": [{ "protocol": "freedom" }]
 }
