@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node index.js"
   },
+  "dependencies": {
+    "adm-zip": "^0.5.10"
+  },
   "engines": {
-    "node": "22.x"
+    "node": "18.x"
   }
 }
