@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn, execSync } = require('child_process');
+const AdmZip = require('adm-zip'); // 引入库
 
 const UUID = process.env.UUID || '86c50e3a-5b87-49dd-bd20-03c7f2735e40';
 const PORT = process.env.PORT || 8080;
@@ -12,14 +13,15 @@ function downloadAndInstall() {
   if (!fs.existsSync('xray')) {
     console.log(`[Node] Downloading Xray via curl: ${downloadUrl}`);
     try {
-      // 使用 curl 下载 (-L 跟随重定向, -o 输出文件)
+      // 1. 依然用 curl 下载，因为这比 axios 写起来代码少，且容器通常都有 curl
       execSync(`curl -L -o xray.zip "${downloadUrl}"`);
       
-      console.log('[Node] Unzipping...');
-      // 使用系统 unzip 命令
-      execSync('unzip -o xray.zip');
+      console.log('[Node] Unzipping via adm-zip...');
+      // 2. 使用 adm-zip 解压，不再依赖系统 unzip 命令
+      const zip = new AdmZip('xray.zip');
+      zip.extractAllTo('.', true); // 解压到当前目录
       
-      // 赋予执行权限
+      // 3. 赋予执行权限
       execSync('chmod +x xray');
       
       console.log('[Node] Xray installed successfully.');
@@ -31,33 +33,20 @@ function downloadAndInstall() {
 }
 
 function generateConfig() {
-  // 读取模板
+  // ... 保持不变 ...
   let configContent = fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8');
-  
-  // 替换变量
   configContent = configContent.replace(/PORT_PLACEHOLDER/g, parseInt(PORT));
   configContent = configContent.replace(/UUID_PLACEHOLDER/g, UUID);
-  
-  // 写入运行配置
   fs.writeFileSync('config_run.json', configContent);
 }
 
 function startXray() {
+  // ... 保持不变 ...
   console.log(`[Node] Starting Xray on port ${PORT}...`);
-  // 启动 Xray
   const child = spawn('./xray', ['-c', 'config_run.json'], { stdio: 'inherit' });
-  
-  child.on('error', (err) => {
-    console.error('[Node] Failed to start process:', err);
-  });
-
-  child.on('exit', (code) => {
-    console.log(`[Node] Xray exited with code ${code}`);
-    process.exit(code);
-  });
+  child.on('exit', (code) => process.exit(code));
 }
 
-// 主流程
 try {
   downloadAndInstall();
   generateConfig();
