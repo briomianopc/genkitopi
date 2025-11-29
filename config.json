@@ -20,11 +20,11 @@
         "security": "reality",
         "realitySettings": {
           "show": false,
-          "dest": "www.yahoo.com:443",
+          "dest": "www.apple.com:443",
           "xver": 0,
           "serverNames": [
-            "www.yahoo.com",
-            "yahoo.com"
+            "www.apple.com",
+            "apple.com"
           ],
           "privateKey": "PRIVATE_KEY_PLACEHOLDER",
           "shortIds": [
