@@ -1,27 +1,29 @@
 {
-  "log": { "loglevel": "warning" },
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
   "inbounds": [
     {
-      "port": PORT_PLACEHOLDER,
-      "protocol": "vless",
-      "settings": {
-        "clients": [
-          {
-            "id": "UUID_PLACEHOLDER",
-            "level": 0,
-            "email": "koyeb@user"
-          }
-        ],
-        "decryption": "none"
-      },
-      "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "path": "/laowang"
+      "type": "trojan",
+      "tag": "trojan-in",
+      "listen": "::",
+      "listen_port": PORT_PLACEHOLDER,
+      "users": [
+        {
+          "password": "PASSWORD_PLACEHOLDER"
         }
+      ],
+      "transport": {
+        "type": "grpc",
+        "service_name": "laowangopc"
       }
     }
   ],
-  "outbounds": [{ "protocol": "freedom" }]
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ]
 }
