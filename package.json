@@ -1,12 +1,12 @@
 {
-  "name": "koyeb-xray-ws",
+  "name": "singbox-trojan-node",
   "version": "1.0.0",
-  "description": "Xray VLESS WebSocket",
+  "description": "Sing-box Trojan gRPC via Node.js",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=18.0.0"
   }
 }
